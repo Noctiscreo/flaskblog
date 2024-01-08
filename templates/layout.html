@@ -18,6 +18,7 @@
     {% endif %}
 </head>
 <body>
+  <!-- Navbar -->
     <header class="site-header">
         <nav class="navbar navbar-expand-md navbar-dark bg-steel fixed-top">
           <div class="container">
@@ -41,9 +42,27 @@
       </header>
       <main role="main" class="container">
         <div class="row">
+            <!-- Blog Posts -->
           <div class="col-md-8">
+            <!-- 'with' lets you define a variable (in this scope only)
+            'get_flashed_messages' is a built in function.
+            'with categories = true' allows the 2nd parameter in the 'register' function
+            in the routes (flaskblog.py) to be added 
+            (e.g. a 'success' bootstrap class) -->
+            {% with messages = get_flashed_messages(with_categories=true) %}
+            <!-- if the messages variable is not empty: -->
+              {% if messages %}
+              <!-- loop through the messages, display and apply a 'category' css to them -->
+                {% for category, message in messages %}
+                  <div class="alert alert-{{ category }}">
+                    {{ message }}
+                  </div>
+                {% endfor %}
+              {% endif %}
+            {% endwith %}
             {% block content %}{% endblock %}
           </div>
+          <!-- Right Sidebar -->
           <div class="col-md-4">
             <div class="content-section">
               <h3>Our Sidebar</h3>

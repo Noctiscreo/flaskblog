@@ -6,12 +6,13 @@
     <div class="content-section">
 
         <!-- POST and "" = posts to the same, current route -->
-        <form method="POST" action="">
+        <form method="POST" action="" novalidate>
             <!-- .hidden_tag() adds a 'CSRF token', 
                 Cross Site Request Forgery token, 
                 aka security features, uses Secret Key.-->
             {{ form.hidden_tag() }}
-             <!-- 'form-group' is a bootstrap class -->
+             <!-- 'fieldset' groups related elements in a form.
+                'form-group' is a bootstrap class -->
             <fieldset class="form-group">
                 <!-- border-bottom adds styling, mb-4 = margin-bottom 4 -->
                 <!-- a 'legend' is a form's label -->
@@ -57,7 +58,8 @@
 
     <div class="border-top pt-3">
         <small class="text-muted">
-            <!-- 'login' is not the name of the route, but the route function -->
+            <!-- Link to your login page using the 'url_for' function. 
+                Note: 'login' is not the name of the route, but the route FUNCTION -->
             Already Have An Account? <a class="ml-2" href="{{ url_for('login')}}">Sign In</a>
         </small>
     </div>

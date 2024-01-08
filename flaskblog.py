@@ -1,7 +1,7 @@
 # render_template enalbes Flask to render html files.
 # url_for enables linking to files, e.g. for CSS files:
 # <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='main.css') }}">
-from flask import Flask, render_template, url_for
+from flask import Flask, render_template, url_for, flash, redirect
 
 # Import the forms you've made in forms.py:
 from forms import RegistrationForm, LoginForm
@@ -38,10 +38,13 @@ def home():
 def about():
     return render_template('about.html', title='About')
 
-@app.route("/register")
+@app.route("/register", methods=['GET', 'POST'])
 def register():
     # Create an instance of the form class:
     form = RegistrationForm()
+    if form.validate_on_submit():
+        flash(f'Account created for {form.username.data}!', 'success')
+        return redirect(url_for('home'))
     return render_template('register.html', title='Register', form=form)
 
 @app.route("/login")

@@ -1,7 +1,10 @@
+<!-- Adds the boilerplate layout -->
 {% extends "layout.html" %}
+
 {% block content %}
-    <!-- 'content-section' is in CSS -->
+    <!-- 'content-section' is a style in main.css -->
     <div class="content-section">
+
         <!-- POST and "" = posts to the same, current route -->
         <form method="POST" action="">
             <!-- .hidden_tag() adds a 'CSRF token', 
@@ -11,13 +14,19 @@
              <!-- 'form-group' is a bootstrap class -->
             <fieldset class="form-group">
                 <!-- border-bottom adds styling, mb-4 = margin-bottom 4 -->
+                <!-- a 'legend' is a form's label -->
                 <legend class="border-bottom mb-4">Join Today</legend>
                 <div class="form-group">
-                    <!-- Uses fields from 'form'.
-                    'label' prints out the label from the username field. 
-                    'form-control-label' is a 'form' class argument that passes in
-                    a bootstrap HTML class -->
+                    
+                    <!-- Gets fields from the 'form' passed in from 'forms.py'
+                    * .label prints out a heading (label) above the username field.
+                    'username' is the name we gave the variable in forms.py that 
+                    stores the StringField class.
+                    * 'form-control-label' adds a Bootstrap style -->
                     {{ form.username.label(class="form-control-label") }}
+                    
+                    <!-- Creates the form field 
+                    * Classes add styling. -->
                     {{ form.username(class="form-control form-control-lg") }}
                 </div>
 

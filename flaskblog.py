@@ -2,7 +2,10 @@
 # url_for enables linking to files, e.g. for CSS files:
 # <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='main.css') }}">
 from flask import Flask, render_template, url_for
+
+# Import the forms you've made in forms.py:
 from forms import RegistrationForm, LoginForm
+
 # Instantiates a Flask application into 'app'.
 app = Flask(__name__)
 
@@ -37,6 +40,7 @@ def about():
 
 @app.route("/register")
 def register():
+    # Create an instance of the form class:
     form = RegistrationForm()
     return render_template('register.html', title='Register', form=form)
 

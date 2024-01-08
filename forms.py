@@ -4,13 +4,15 @@ from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, SubmitField, BooleanField
 from wtforms.validators import DataRequired, Length, Email, EqualTo
 
-# RegistrationForm is inheriting from the module FlaskForm.
-
-# Creates a registration form.
+# Creates a registration form, and inherits this from FlaskForm.
 class RegistrationForm(FlaskForm):
-    username = StringField('Username', 
-                           validators=[DataRequired(), Length(min=2, max=20)])
+    # Form fields are all imported classes from the WTForms package.
 
+    # StringField = string input by user. 'Username' = label.
+    username = StringField('Username', 
+                           # DataRequired = 'can't be empty'.
+                           # Lengh = min and max length of entry.
+                           validators=[DataRequired(), Length(min=2, max=20)])
     email = StringField('Email',
                         validators=[DataRequired(), Email()])
     
@@ -23,7 +25,7 @@ class RegistrationForm(FlaskForm):
     submit = SubmitField('Sign Up')
 
 
-# Creates a login form.
+# Creates a login form, inherited from FlaskForm.
 class LoginForm(FlaskForm):
     email = StringField('Email',
                         validators=[DataRequired(), Email()])

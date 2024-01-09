@@ -17,20 +17,17 @@
                 <!-- border-bottom adds styling, mb-4 = margin-bottom 4 -->
                 <!-- a 'legend' is a form's label -->
                 <legend class="border-bottom mb-4">Join Today</legend>
+
                 <div class="form-group">
-                    
-                    <!-- Gets fields from the 'form' passed in from 'forms.py'
+                    <!-- Gets username field label from the 'form' passed in from 'forms.py'
                     * .label prints out a heading (label) above the username field.
-                    'username' is the name we gave the variable in forms.py that 
-                    stores the StringField class.
+                    'username' is the name we gave the variable in forms.py that stores the StringField class.
                     * 'form-control-label' adds a Bootstrap style -->
                     {{ form.username.label(class="form-control-label") }}
                     
                     <!-- Adds error feedback -->
-                    <!-- if the form has errors: -->
                     {% if form.username.errors %}
-                    <!-- Add 'is-invalid' class to the form field if there's an error. 
-                    This should change the form field to red(?) -->
+                    <!-- Add 'is-invalid' class to the form field if there's an error. -->
                         {{ form.username(class="form-control form-control-lg is-invalid") }}
                         <!-- Add error message(s) underneath the field. -->
                         <div class="invalid-feedback">
@@ -39,13 +36,9 @@
                             {% endfor %}
                         </div>
                     {% else %}
-                            <!-- Creates the form field -->
-                            <!-- If there are no errors, print out the valid field as usual -->
+                        <!-- If there are no errors, print out the valid field as usual -->
                         {{ form.username(class="form-control form-control-lg") }}
                     {% endif %}
-
-
-                    
                 </div>
 
                 <div class="form-group">
@@ -89,6 +82,7 @@
                         {{ form.confirm_password(class="form-control form-control-lg") }}
                     {% endif %}
                 </div>
+
             </fieldset>
 
             <div class="form-group">

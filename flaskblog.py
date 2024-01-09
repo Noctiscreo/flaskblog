@@ -43,7 +43,11 @@ def register():
     # Create an instance of the form class:
     form = RegistrationForm()
     if form.validate_on_submit():
+        # 'flash' sends a one time alert. 
+        # The 'success' parameter adds a bootstrap class.
         flash(f'Account created for {form.username.data}!', 'success')
+        # Redirect user to a different page from the form.
+        # 'home' is the name of the FUNCTION, not the route.
         return redirect(url_for('home'))
     return render_template('register.html', title='Register', form=form)
 

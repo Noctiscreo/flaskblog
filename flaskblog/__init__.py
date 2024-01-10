@@ -1,6 +1,3 @@
-# render_template enables Flask to render html files.
-# url_for enables linking to files, e.g. for CSS files:
-# <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='main.css') }}">
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 

@@ -17,6 +17,8 @@ db = SQLAlchemy(app)
 bcrypt = Bcrypt(app)
 
 login_manager = LoginManager(app)
+# 'login' is the route
+login_manager.login_view = 'login'
 
 from flaskblog import routes
 

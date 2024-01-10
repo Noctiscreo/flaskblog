@@ -2,10 +2,9 @@
 # url_for enables linking to files, e.g. for CSS files:
 # <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='main.css') }}">
 from flask import render_template, url_for, flash, redirect
-from flaskblog import app
+from flaskblog import app, db, bcrypt
 from flaskblog.forms import RegistrationForm, LoginForm
 from flaskblog.models import User, Post
-
 
 posts = [
     {
@@ -37,13 +36,24 @@ def about():
 def register():
     # Create an instance of the form class:
     form = RegistrationForm()
+    # Check if form is valid on submit:
     if form.validate_on_submit():
-        # 'flash' sends a one time alert. 
-        # The 'success' parameter adds a bootstrap class.
-        flash(f'Account created for {form.username.data}!', 'success')
+        # If valid, create hashed password, 
+        # taking the form.password.data from the user input.
+        # And decode it into a string using decode('utf-8'):
+        hashed_password = bcrypt.generate_password_hash(form.password.data).decode('utf-8')
+        # Then create a new user from the form:
+        user = User(username=form.username.data, email=form.email.data, password=hashed_password)
+        # Add the 'user' above to the database:
+        db.session.add(user)
+        # Commit the changes:
+        db.session.commit()
+        # Then add the 'success' parameter adds a bootstrap class
+        # and adds a one time message to the user.
+        flash('Your account has been created! You are now able to log in.', 'success')
         # Redirect user to a different page from the form.
         # 'home' is the name of the FUNCTION, not the route.
-        return redirect(url_for('home'))
+        return redirect(url_for('login'))
     return render_template('register.html', title='Register', form=form)
 
 @app.route("/login", methods=['GET', 'POST'])

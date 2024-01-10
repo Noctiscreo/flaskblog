@@ -1,10 +1,18 @@
 from datetime import datetime
 # Imports db variable from __init__.py
-from flaskblog import db
+from flaskblog import db, login_manager
+from flask_login import UserMixin
+
+@login_manager.user_loader
+def load_user(user_id):
+    return User.query.get(int(user_id))
+
+
 
 # Each class is a table in the database:
 # Imports from db.Model.
-class User(db.Model):
+# UserMixin is inherited from the flask_login Login Manager.
+class User(db.Model, UserMixin):
     # Columns for each table (primary key = unique ID for the user):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(20), unique=True, nullable=False)

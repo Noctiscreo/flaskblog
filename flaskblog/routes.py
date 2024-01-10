@@ -5,6 +5,7 @@ from flask import render_template, url_for, flash, redirect
 from flaskblog import app, db, bcrypt
 from flaskblog.forms import RegistrationForm, LoginForm
 from flaskblog.models import User, Post
+from flask_login import login_user, current_user
 
 posts = [
     {
@@ -34,6 +35,8 @@ def about():
 
 @app.route("/register", methods=['GET', 'POST'])
 def register():
+    if current_user.is_authenticated:
+        return redirect(url_for('home'))
     # Create an instance of the form class:
     form = RegistrationForm()
     # Check if form is valid on submit:
@@ -59,12 +62,20 @@ def register():
 @app.route("/login", methods=['GET', 'POST'])
 def login():
     form = LoginForm()
+    if current_user.is_authenticated:
+        return redirect(url_for('home'))
     if form.validate_on_submit():
-        # Dummy data to test the form entry is successful:
-        if form.email.data == 'admin@blog.com' and form.password.data == 'password':
-            flash('You have been logged in!', 'success')
+        # If the user existsL
+        user = User.query.filter_by(email=form.email.data).first()
+        # and if the password they entered is valid:
+        if user and bcrypt.check_password_hash(user.password, form.password.data):
+            # First parameter is 'login this user,'
+            # Second parameter checks 'remember me?' option.
+            # Remember me is a true/false value (depending on if they checked it).
+            login_user(user, remember=form.remember.data)
+            # After they've logged in, redirect them to the homepage:
             return redirect(url_for('home'))
         else:
             # 'danger' is the bootstrap style for an error.
-            flash('Login Unsuccessful. Please check username and password', 'danger')
+            flash('Login Unsuccessful. Please check email and password', 'danger')
     return render_template('login.html', title='Login', form=form)

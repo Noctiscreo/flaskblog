@@ -17,8 +17,10 @@ db = SQLAlchemy(app)
 bcrypt = Bcrypt(app)
 
 login_manager = LoginManager(app)
-# 'login' is the route
+# 'login' is the route that gets used if the user is not logged in.
 login_manager.login_view = 'login'
+# 'info' is a bootstrap class.
+login_manager.login_message_category = 'info'
 
 from flaskblog import routes
 

@@ -1,7 +1,7 @@
 # render_template enables Flask to render html files.
 # url_for enables linking to files, e.g. for CSS files:
 # <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='main.css') }}">
-from flask import render_template, url_for, flash, redirect
+from flask import render_template, url_for, flash, redirect, request
 from flaskblog import app, db, bcrypt
 from flaskblog.forms import RegistrationForm, LoginForm
 from flaskblog.models import User, Post
@@ -73,8 +73,14 @@ def login():
             # Second parameter checks 'remember me?' option.
             # Remember me is a true/false value (depending on if they checked it).
             login_user(user, remember=form.remember.data)
-            # After they've logged in, redirect them to the homepage:
-            return redirect(url_for('home'))
+            # 'args' is a dictionary, so we use .get
+            # in case the 'next' key doesn't exist 
+            # (it won't crash, it will return 'None')
+            next_page = request.args.get('next')
+            # After they've logged in, redirect them to the homepage
+            # if 'next_page' is None.
+            # Below is a 'turnary' operator.
+            return redirect(next_page) if next_page else redirect(url_for('home'))
         else:
             # 'danger' is the bootstrap style for an error.
             flash('Login Unsuccessful. Please check email and password', 'danger')

@@ -1,3 +1,12 @@
+# Grabs file extensions:
+import os
+
+# Creates a random hex:
+import secrets
+
+# Pillow for managing image size.
+from PIL import Image
+
 # render_template enables Flask to render html files.
 # url_for enables linking to files, e.g. for CSS files:
 # <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='main.css') }}">
@@ -94,6 +103,40 @@ def logout():
     # Send the user back to the homepage.
     return redirect(url_for('home'))
 
+def save_picture(form_picture):
+    # Randomize the name of the picture with 8 bytes:
+    random_hex = secrets.token_hex(8)
+    # Grab file name and extension using the 'os' module:
+    # form_picture.filename = data from the field that the user submits.
+    # '_' is used in python for variables that we don't use.
+    # f_ext = file extension
+    _, f_ext = os.path.splitext(form_picture.filename)
+    # Combing the random hex with the file name we want to save:
+    picture_fn = random_hex + f_ext
+
+    # To save our pics into our static folder:
+    # app.root_path = gives the root path of our application up to our package directory.
+    #  picture_path now contains the full path and file name of the image 
+    # (i.e., the hex, the extension, and where we want to save it)
+    picture_path = os.path.join(app.root_path, 'static/profile_pics', picture_fn)
+
+    # Set the pixel size you want for the website:
+    output_size = (125, 125)
+    # Open the image passed into the function above:
+    i = Image.open(form_picture)
+    # Resize the image:
+    i.thumbnail(output_size)
+
+    # Save the image above ('i') using the path we created:
+    i.save(picture_path)
+
+    # Removes the previous picture:
+    prev_picture = os.path.join(app.root_path, 'static/profile_pics', current_user.image_file)
+    if os.path.exists(prev_picture):
+        os.remove(prev_picture)
+
+    return picture_fn
+
 @app.route("/account", methods=['GET', 'POST'])
 # With @login_required, the extension knows 
 # that we need to log in to access this route
@@ -103,6 +146,14 @@ def account():
    form = UpdateAccountForm()
    # Validate the form when it's submitted:
    if form.validate_on_submit():
+       # If there is a profile picture in the update field:
+       if form.picture.data:
+           # Save the picture and give back the file name:
+            picture_file = save_picture(form.picture.data)
+            # Set the picture_file to the image_file.
+            # 'image_file' is defined below.
+            current_user.image_file = picture_file
+
        # Set the current user's username in db to the new one submitted in the form.
        current_user.username = form.username.data
        # Set the current user's email in db to the new one submitted in the form.

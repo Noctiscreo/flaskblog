@@ -1,3 +1,4 @@
 flaskblog/__pycache__/*
 *.db
 *.idea
+*.jpg

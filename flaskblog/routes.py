@@ -3,7 +3,7 @@
 # <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='main.css') }}">
 from flask import render_template, url_for, flash, redirect, request
 from flaskblog import app, db, bcrypt
-from flaskblog.forms import RegistrationForm, LoginForm
+from flaskblog.forms import RegistrationForm, LoginForm, UpdateAccountForm
 from flaskblog.models import User, Post
 from flask_login import login_user, current_user, logout_user, login_required
 
@@ -94,9 +94,31 @@ def logout():
     # Send the user back to the homepage.
     return redirect(url_for('home'))
 
-@app.route("/account")
+@app.route("/account", methods=['GET', 'POST'])
 # With @login_required, the extension knows 
 # that we need to log in to access this route
 @login_required
 def account():
-   return render_template('account.html', title='Acount')
+   # Create instance of 'UpdateAccount' form:
+   form = UpdateAccountForm()
+   # Validate the form when it's submitted:
+   if form.validate_on_submit():
+       # Set the current user's username in db to the new one submitted in the form.
+       current_user.username = form.username.data
+       # Set the current user's email in db to the new one submitted in the form.
+       current_user.email = form.email.data
+       # Commit these changes to the database:
+       db.session.commit()
+       # Add a flash message to notify user that the account has been updated.
+       flash('Your account has been updated!', 'success')
+       return redirect(url_for('account'))
+   # Display the current username and email:
+   elif request.method == 'GET':
+       form.username.data = current_user.username
+       form.email.data = current_user.email
+   # current_user.image_file is a column in User's database, in 'models.py'.
+   # In that column, there is a default='default.jpg'.
+   image_file = url_for('static', filename='profile_pics/' + current_user.image_file)
+   # Pass the image_file into the account template so it can be used in the html:
+   return render_template('account.html', title='Acount', 
+                          image_file=image_file, form=form)

@@ -12,7 +12,7 @@ from PIL import Image
 # <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='main.css') }}">
 from flask import render_template, url_for, flash, redirect, request
 from flaskblog import app, db, bcrypt
-from flaskblog.forms import RegistrationForm, LoginForm, UpdateAccountForm
+from flaskblog.forms import RegistrationForm, LoginForm, UpdateAccountForm, PostForm
 from flaskblog.models import User, Post
 from flask_login import login_user, current_user, logout_user, login_required
 
@@ -173,3 +173,17 @@ def account():
    # Pass the image_file into the account template so it can be used in the html:
    return render_template('account.html', title='Acount', 
                           image_file=image_file, form=form)
+
+# Enabling GET and POST:
+@app.route("/post/new", methods=['GET', 'POST'])
+# Require the user to be logged in:
+@login_required
+def new_post():
+    # Add our 'post' from forms.py into the route here:
+    form = PostForm()
+    # Add validation:
+    if form.validate_on_submit():
+        flash('Your post has been created!', 'success')
+        return redirect(url_for('home'))
+    # Add form=form so we can pass it into the template:
+    return render_template('create_post.html', title='New Post', form=form)

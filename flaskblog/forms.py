@@ -5,7 +5,7 @@ from flask_wtf import FlaskForm
 # FileAllowed = validator that says the type of file that can be uploaded.
 from flask_wtf.file import FileField, FileAllowed
 from flask_login import current_user
-from wtforms import StringField, PasswordField, SubmitField, BooleanField
+from wtforms import StringField, PasswordField, SubmitField, BooleanField, TextAreaField
 from wtforms.validators import DataRequired, Length, Email, EqualTo, ValidationError
 from flaskblog.models import User
 
@@ -104,3 +104,15 @@ class UpdateAccountForm(FlaskForm):
             # If the email already exists in the db:
             if user:
                 raise ValidationError('That email is taken. Please choose a different one.')
+            
+# Forms are classes.
+# Import from FlaskForm.
+class PostForm(FlaskForm):
+    # Title field (string)
+    # 'Title' = label
+    # DataRequired = mandatory field for the user to fill in.
+    title = StringField('Title', validators=[DataRequired()])
+    # TextAreaField ('Content') = title of the field.
+    content = TextAreaField('Content', validators=[DataRequired()])
+    # Submit button ('Post') = button text:
+    submit = SubmitField('Post')

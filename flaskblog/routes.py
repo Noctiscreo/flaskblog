@@ -234,3 +234,22 @@ def update_post(post_id):
     # legend='Update Post' creates a new legend we can use in the template.
     return render_template('create_post.html', title='Update Post', 
                            form=form, legend='Update Post')
+
+
+@app.route("/post/<int:post_id>/delete", methods=['POST'])
+# To update a post, require the user to be logged in.:
+@login_required
+# post_id is passed in as an argument.
+def delete_post(post_id):
+    # Get a post with the id of the page we're on:
+    post = Post.query.get_or_404(post_id)
+    # Only the use who wrote this post can update it:
+    if post.author != current_user:
+        # 403 = forbidden route.
+        abort(403)
+    # Deletes post:
+    db.session.delete(post)
+    # Commits the delete:
+    db.session.commit()
+    flash('Your post has been deleted!', 'success')
+    return redirect(url_for('home'))

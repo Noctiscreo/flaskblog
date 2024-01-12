@@ -10,7 +10,7 @@ from PIL import Image
 # render_template enables Flask to render html files.
 # url_for enables linking to files, e.g. for CSS files:
 # <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='main.css') }}">
-from flask import render_template, url_for, flash, redirect, request
+from flask import render_template, url_for, flash, redirect, request, abort
 from flaskblog import app, db, bcrypt
 from flaskblog.forms import RegistrationForm, LoginForm, UpdateAccountForm, PostForm
 from flaskblog.models import User, Post
@@ -182,15 +182,55 @@ def new_post():
         flash('Your post has been created!', 'success')
         return redirect(url_for('home'))
     # Add form=form so we can pass it into the template:
-    return render_template('create_post.html', title='New Post', form=form)
+    return render_template('create_post.html', title='New Post', 
+                           form=form, legend='New Post')
 
-# <post_id> puts the 'int:post_id' integer variable into the route:
+# <post_id> puts the 'int:post_id' integer variable into the route.
+# It does this from the template. The home.html template creates a url here:
+# The home.html line takes post.id from the Post class in models.py(?)
+# href="{{ url_for('post', post_id=post.id) }}"
+# This URL id is then sent to the route below(?), which tries
+# to get the post_id, and if there isn't one, creates a 404 error.
 # e.g. /post/1
 @app.route("/post/<int:post_id>")
 # post_id is passed in as an argument.
 def post(post_id):
+    # Get a post with the id that's been passed into the URL:
     # get_or_404 = convenient method to get something or post a 404 error.
     post = Post.query.get_or_404(post_id)
     # post.html = url, title = the title of the page, 
     # post = passing the 'post'variable to the html page.
     return render_template('post.html', title=post.title, post=post)
+
+
+@app.route("/post/<int:post_id>/update", methods=['GET', 'POST'])
+# To update a post, require the user to be logged in.:
+@login_required
+# post_id is passed in as an argument.
+def update_post(post_id):
+    # Get a post with the id of the page we're on:
+    post = Post.query.get_or_404(post_id)
+    # Only the use who wrote this post can update it:
+    if post.author != current_user:
+        # 403 = forbidden route.
+        abort(403)
+    # Create a post form.
+    form = PostForm()
+    # If the form entries are valid:
+    if form.validate_on_submit():
+        post.title = form.title.data
+        post.content = form.content.data
+        # Commit the changes to the database.
+        # Note there is no 'adding,' as the changes are already in the database.
+        db.session.commit()
+        flash('Your post has been updated!', 'success')
+        return redirect(url_for('post', post_id=post.id))
+    # Make sure the form is populated when there is a GET request:
+    elif request.method == 'GET':
+        # The html form's title is populated with the post.title data.
+        form.title.data = post.title
+        # The html form's data is populated with the post.content data.
+        form.content.data = post.content
+    # legend='Update Post' creates a new legend we can use in the template.
+    return render_template('create_post.html', title='Update Post', 
+                           form=form, legend='Update Post')

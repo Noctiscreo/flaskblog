@@ -7,8 +7,6 @@ from flask_login import UserMixin
 def load_user(user_id):
     return User.query.get(int(user_id))
 
-
-
 # Each class is a table in the database:
 # Imports from db.Model.
 # UserMixin is inherited from the flask_login Login Manager.

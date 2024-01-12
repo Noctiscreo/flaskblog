@@ -16,25 +16,13 @@ from flaskblog.forms import RegistrationForm, LoginForm, UpdateAccountForm, Post
 from flaskblog.models import User, Post
 from flask_login import login_user, current_user, logout_user, login_required
 
-posts = [
-    {
-        'author': 'Corey Shafer',
-        'title': 'Blog Post 1',
-        'content': 'First post content',
-        'date_posted': 'April 20, 2018'
-    },
-    {
-        'author': 'John Hasznosi',
-        'title': 'Blog Post 2',
-        'content': 'Second post content',
-        'date_posted': 'Jan 4, 2024'
-    }
-]
 
 # '@app' allows us to write a function for the route.
 @app.route("/")
 @app.route("/home")
 def home():
+    # Grab all of the posts from the database:
+    posts = Post.query.all()
     return render_template('home.html', posts=posts)
 
 
@@ -183,6 +171,14 @@ def new_post():
     form = PostForm()
     # Add validation:
     if form.validate_on_submit():
+        # Fills in database from the form that's filled in by the user.
+        # 'author' is the backref used by User in models.py:
+        # backref='author'
+        post = Post(title=form.title.data, content=form.content.data, author=current_user)
+        # Add the post to the database:
+        db.session.add(post)
+        # Commit the post to the database:
+        db.session.commit()
         flash('Your post has been created!', 'success')
         return redirect(url_for('home'))
     # Add form=form so we can pass it into the template:

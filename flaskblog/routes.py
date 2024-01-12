@@ -183,3 +183,14 @@ def new_post():
         return redirect(url_for('home'))
     # Add form=form so we can pass it into the template:
     return render_template('create_post.html', title='New Post', form=form)
+
+# <post_id> puts the 'int:post_id' integer variable into the route:
+# e.g. /post/1
+@app.route("/post/<int:post_id>")
+# post_id is passed in as an argument.
+def post(post_id):
+    # get_or_404 = convenient method to get something or post a 404 error.
+    post = Post.query.get_or_404(post_id)
+    # post.html = url, title = the title of the page, 
+    # post = passing the 'post'variable to the html page.
+    return render_template('post.html', title=post.title, post=post)

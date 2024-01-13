@@ -27,7 +27,8 @@ def home():
     # Grab all of the posts from the database:
     # Paginate the page so that there are 5 pages on a page.
     # page=page sets the page displayed to the 'page' set above (1 by default).
-    posts = Post.query.paginate(page=page, per_page=1)
+    # .order_by(Post.date_posted.desc()) changes the order of the posts so newest = top on the page.
+    posts = Post.query.order_by(Post.date_posted.desc()).paginate(page=page, per_page=5)
     return render_template('home.html', posts=posts)
 
 
@@ -258,3 +259,26 @@ def delete_post(post_id):
     db.session.commit()
     flash('Your post has been deleted!', 'success')
     return redirect(url_for('home'))
+
+# <str:username> = user's user name (a dynmaic parameter)
+# username = variable name
+@app.route("/user/<string:username>")
+def user_posts(username):
+    # Grab a query parameter in the URL to get the page the user wants.
+    # 'page' is optional parameter, so '1' is default.
+    page = request.args.get('page', 1, type=int)
+    # Get this user.
+    # first_or_404() = get the first user with this user name,
+    # if you get a None, just use a 404.
+    user = User.query.filter_by(username=username).first_or_404()
+
+    # Grab all of the posts from the database:
+    # Paginate the page so that there are 5 pages on a page.
+    # page=page sets the page displayed to the 'page' set above (1 by default).
+    # .order_by(Post.date_posted.desc()) changes the order of the posts so newest = top on the page.
+    # \ just breaks up the line to make it more readable code.
+    posts = Post.query.filter_by(author=user)\
+        .order_by(Post.date_posted.desc())\
+        .paginate(page=page, per_page=5)
+    # We'll create a new template, and poass in the posts and the user:
+    return render_template('user_posts.html', posts=posts, user=user)

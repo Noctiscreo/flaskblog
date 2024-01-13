@@ -1,6 +1,6 @@
 {% extends "layout.html" %}
 {% block content %}
-    {% for post in posts %}
+    {% for post in posts.items %}
         <article class = "media content-section">
             <!-- Insert image. -->
             <!-- 'rounded-circle' = bootstrap -->
@@ -22,5 +22,17 @@
                 <p class="article-content">{{ post.content }}</p>
             </div>
         </article>
+    {% endfor %}
+    <!-- Add pagination -->
+    <!--  -->
+    {% for page_num in posts.iter_pages() %}
+        <!-- if page_num is NOT None, create a link: -->
+        {% if page_num %}
+            <!-- URL for the home page + the page = the page we're currently on.  -->
+            <a class="btn btn-outline-info mb-4" href="{{ url_for('home', page=page_num )}}">{{ page_num }}</a>
+        <!-- If page_num = None, then: -->
+        {% else %}
+            ...
+        {% endif %}
     {% endfor %}
 {% endblock content %}

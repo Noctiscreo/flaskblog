@@ -12,7 +12,8 @@ from PIL import Image
 # <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='main.css') }}">
 from flask import render_template, url_for, flash, redirect, request, abort
 from flaskblog import app, db, bcrypt
-from flaskblog.forms import RegistrationForm, LoginForm, UpdateAccountForm, PostForm
+from flaskblog.forms import (RegistrationForm, LoginForm, UpdateAccountForm, 
+                             PostForm, RequestResetForm, ResetPasswordForm)
 from flaskblog.models import User, Post
 from flask_login import login_user, current_user, logout_user, login_required
 
@@ -282,3 +283,50 @@ def user_posts(username):
         .paginate(page=page, per_page=5)
     # We'll create a new template, and poass in the posts and the user:
     return render_template('user_posts.html', posts=posts, user=user)
+
+# Send an email
+def send_reset_email(user):
+    pass
+
+# User enters email to request password reset:
+@app.route("/reset_password", methods=['GET', 'POST'])
+def reset_request():
+    # Make sure that the user is logged out.
+    # current_user.is_authenticated = False when user is logged out(?)
+    if current_user.is_authenticated:
+        return redirect(url_for('home'))
+    form = RequestResetForm()
+    # At this point, they have submitted an email into the form (22:08 in tutoral 10):
+    # Forms will submit back to this same route they were rendered from.
+    if form.validate_on_submit():
+        # Grab the user for that email:
+        # User.query.filter_by(email=form.email.data) = the query.
+        # .first() = get the first user with that email.
+        user = User.query.filter_by(email=form.email.data).first()
+        send_reset_email(user)
+        flash('An email has been sent with instructions to reset your password.', 'info')
+        # Redirect back to login page:
+        return redirect(url_for('login'))
+        # Send the user an email with the token.
+
+    return render_template('reset_request.html', title="Reset Password", form=form)
+
+# User resets their password while the token is active:
+# The token is passed in as a parameter to the URL.
+@app.route("/reset_password/<token>", methods=['GET', 'POST'])
+def reset_with_token(token):
+    if current_user.is_authenticated:
+        # Make sure that the user is logged out.
+        return redirect(url_for('home'))
+    # very_reset_token is a static method we defined in models.py,
+    # which returns User.query.get(user_id)
+    user = User.verify_reset_token(token)
+    # If user above is expired or invalid (due to invalid token):
+    if user is None:
+        # 'warning' = bootstrap alert
+        flash('That is an invalid or expired token', 'warning')
+        return redirect(url_for('reset_request'))
+    # If we pass the conditional above (the use IS valid):
+    form = ResetPasswordForm()
+    # Render and send the 'reset password' form to the template.
+    render_template('reset_token.html', title="Reset Password", form=form)

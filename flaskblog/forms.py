@@ -76,8 +76,7 @@ class UpdateAccountForm(FlaskForm):
                            # Lengh = min and max length of entry.
                            validators=[DataRequired(), Length(min=2, max=20)])
     
-    email = StringField('Email',
-                        validators=[DataRequired(), Email()])
+    email = StringField('Email', validators=[DataRequired(), Email()])
     # validators = a list of validators to check against.
     picture = FileField('Update Profile Picture', validators=[FileAllowed(['jpg', 'png'])])
     # 'Update' = the label.
@@ -114,6 +113,33 @@ class PostForm(FlaskForm):
     title = StringField('Title', validators=[DataRequired()])
     # TextAreaField ('Content') = title of the field.
     content = TextAreaField('Content', validators=[DataRequired()])
-    # Submit button ('Post') = button text:
+    # 'Post' = label / button text:
     submit = SubmitField('Post')
 
+class RequestResetForm(FlaskForm):
+    # Email field.
+    email = StringField('Email', validators=[DataRequired(), Email()])
+    # Submit button.
+    # 'Request Password Reset' = button label.
+    submit = SubmitField('Request Password Reset')
+    # validate_[field name], and pass in [field name] as an argument.
+
+    # Check if the DOESN'T exist:
+    def validate_email(self, email):
+
+        # If there's an email, it will add it to the variable.
+        # If there isn't, it will return 'None'.
+        user = User.query.filter_by(email=email.data).first()
+
+        # If the email already exists in the db:
+        if user is None:
+            raise ValidationError('There is no account with that email. You must register first.')
+        
+class ResetPasswordForm(FlaskForm):
+    password = PasswordField('Password',
+                             validators=[DataRequired()])
+    
+    confirm_password = PasswordField('Confirm Password',
+                             validators=[DataRequired(), EqualTo('password')])
+    
+    submit = SubmitField('Reset Password')

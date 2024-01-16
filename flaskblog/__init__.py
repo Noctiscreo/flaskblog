@@ -30,7 +30,7 @@ app.config['MAIL_PORT'] = 465
 app.config["MAIL_USE_TLS"] = False
 app.config['MAIL_USE_SSL'] = True
 
-# First, set up environment variables to hide username and password. Then:
+# Set up environment variables to hide username and password. Then:
 app.config['MAIL_USERNAME'] = os.environ.get('EMAIL_USER')
 app.config['MAIL_PASSWORD'] = os.environ.get('EMAIL_PASS')
 

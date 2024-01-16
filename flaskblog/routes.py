@@ -11,12 +11,12 @@ from PIL import Image
 # url_for enables linking to files, e.g. for CSS files:
 # <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='main.css') }}">
 from flask import render_template, url_for, flash, redirect, request, abort
-from flaskblog import app, db, bcrypt
+from flaskblog import app, db, bcrypt, mail
 from flaskblog.forms import (RegistrationForm, LoginForm, UpdateAccountForm, 
                              PostForm, RequestResetForm, ResetPasswordForm)
 from flaskblog.models import User, Post
 from flask_login import login_user, current_user, logout_user, login_required
-
+from flask_mail import Message
 
 # '@app' allows us to write a function for the route.
 @app.route("/")
@@ -284,9 +284,26 @@ def user_posts(username):
     # We'll create a new template, and poass in the posts and the user:
     return render_template('user_posts.html', posts=posts, user=user)
 
-# Send an email
+# Send the user an email with the reset token:
 def send_reset_email(user):
-    pass
+    # Get the token we made in models.py 'get_reset_token':
+    token = user.get_reset_token()
+    # Send email with the URL of the reset token.
+    # '[subject line]', sender email, user email
+    msg = Message('Password Reset Request', 
+                  sender='temp.email.username.7@gmail.com', 
+                  recipients=[user.email])
+    # token = token we got for the user above
+    # _external = used for getting an absolute URL (rather than relative URL).
+    # The link in the email needs to have the full domain.
+    # You can use Jinja2 templates for messages if wanted.
+    # *Note tabs in the string will actually show up in the email.
+    msg.body = f'''To reset your password, visit the following link:
+{url_for('reset_token', token=token, _external=True)}
+
+If you did not make this request then simply ignore this email and on changes will be made.
+'''# Send the message:
+    mail.send(msg)
 
 # User enters email to request password reset:
 @app.route("/reset_password", methods=['GET', 'POST'])
@@ -314,7 +331,7 @@ def reset_request():
 # User resets their password while the token is active:
 # The token is passed in as a parameter to the URL.
 @app.route("/reset_password/<token>", methods=['GET', 'POST'])
-def reset_with_token(token):
+def reset_token(token):
     if current_user.is_authenticated:
         # Make sure that the user is logged out.
         return redirect(url_for('home'))
@@ -328,5 +345,20 @@ def reset_with_token(token):
         return redirect(url_for('reset_request'))
     # If we pass the conditional above (the use IS valid):
     form = ResetPasswordForm()
+    if form.validate_on_submit():
+        # If valid, create hashed password, 
+        # taking the form.password.data from the user input.
+        # And decode it into a string using decode('utf-8'):
+        hashed_password = bcrypt.generate_password_hash(form.password.data).decode('utf-8')
+        # Set the hash_password to the user's password.
+        user.password = hashed_password
+        # Commit the changes to the user's password:
+        db.session.commit()
+        # Then add the 'success' parameter adds a bootstrap class
+        # and adds a one time message to the user.
+        flash('Your password has been updated! You are now able to log in.', 'success')
+        # Redirect user to a different page from the form.
+        # 'home' is the name of the FUNCTION, not the route.
+        return redirect(url_for('login'))
     # Render and send the 'reset password' form to the template.
-    render_template('reset_token.html', title="Reset Password", form=form)
+    return render_template('reset_token.html', title="Reset Password", form=form)

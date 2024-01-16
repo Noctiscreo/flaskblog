@@ -25,12 +25,16 @@ login_manager.login_view = 'login'
 login_manager.login_message_category = 'info'
 
 # Email account setup for sending password resets.
-app.config['MAIL_SERVER'] = 'smtp.googlemail.com'
-app.config['MAIL_PORT'] = 587
-app.config['MAIL_USE_TLS'] = True
-# Set up environment variables to hider username and password:
+app.config['MAIL_SERVER'] = 'smtp.gmail.com'
+app.config['MAIL_PORT'] = 465
+app.config["MAIL_USE_TLS"] = False
+app.config['MAIL_USE_SSL'] = True
+
+# First, set up environment variables to hide username and password. Then:
 app.config['MAIL_USERNAME'] = os.environ.get('EMAIL_USER')
 app.config['MAIL_PASSWORD'] = os.environ.get('EMAIL_PASS')
+
+# Initialize extension
 mail = Mail(app)
 
 from flaskblog import routes

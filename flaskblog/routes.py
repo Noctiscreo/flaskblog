@@ -358,7 +358,7 @@ def reset_token(token):
         # and adds a one time message to the user.
         flash('Your password has been updated! You are now able to log in.', 'success')
         # Redirect user to a different page from the form.
-        # 'home' is the name of the FUNCTION, not the route.
+        # 'login' is the name of the FUNCTION, not the route.
         return redirect(url_for('login'))
     # Render and send the 'reset password' form to the template.
     return render_template('reset_token.html', title="Reset Password", form=form)

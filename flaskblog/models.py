@@ -1,8 +1,9 @@
 # A model is a class that represents a table or collection in our DB, 
 # and where every attribute of the class is a field of the table or collection.
 
-from datetime import datetime
-from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
+from datetime import datetime, timezone, timedelta
+# from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
+import jwt
 
 # Imports db variable from __init__.py
 from flaskblog import db, login_manager, app
@@ -24,6 +25,22 @@ class User(db.Model, UserMixin):
     # The password will be a hashed string, 60 characters long.
     password = db.Column(db.String(60), nullable=False)
     
+
+    def get_reset_token(self, expired_sec=1800):
+        s = jwt.encode({"exp": datetime.now(tz=timezone.utc) + timedelta
+                        (seconds=expired_sec), "user_id": self.id}, 
+                        app.config['SECRET_KEY'], algorithm="HS256")
+        return s
+
+    @staticmethod
+    def verify_reset_token(token):
+        try:
+            s = jwt.decode(token, app.config['SECRET_KEY'], algorithms=["HS256"])
+            user_id = s['user_id']
+        except:
+            return None
+        return User.query.get(user_id)
+
     # Establish relationship to other tables.
     # Does not create a column in the database, it only makes a query.
     # The User table is related to the Post table.
@@ -32,45 +49,6 @@ class User(db.Model, UserMixin):
     # lazy means SQLAlchemy will load the data as necessary in one go,
     # i.e. all of the posts created by a user.
     posts = db.relationship('Post', backref='author', lazy=True)
-
-    # Get a reset token by setting up the secret key with an expiration time.
-    # Return the token with the dumps method, which returns
-    # a payload with the current user.
-    # expires_seconds=1800 = 30 minute default expiration.
-    def get_reset_token(self, expires_sec=1800):
-        # Create a Serializer object:
-        # app.config['SECRET_KEY']
-        s = Serializer(app.config['SECRET_KEY'], expires_sec)
-        # Return the token:
-        # ({ 'user_id' }) = payload
-        # self.id = instance of the user
-        # self = usual python 'self' for classes, meaning 'this instance'.
-        return s.dumps({'user_id': self.id}).decode('utf-8')
-
-    # Tell python not to expect 'self' as an argument.
-    @staticmethod
-    # Verify the token.
-    # Takes a token as an argument.
-    def verify_reset_token(token):
-        # Creates a Serializer object with a SECRET_KEY.
-        # SECRE_KEY is defined in __init__.py
-        s = Serializer(app.config['SECRET_KEY'])
-        # Because the key or expiry could be invalid, put in a try/except block:
-        # If the user is valid...
-        try: 
-            # Try to load the token.
-            # s.loads(token) = loads the token
-            # Try to get 'user_id' out of the token.
-            # ['user_id'] is the payload that we pass in, 
-            # in get_reset_token above -> 'user_id': self.id
-            user_id = s.loads(token)['user_id']
-        except:
-            # If we get an exception, return None.
-            # i.e. if the token expired.
-            return None
-        # If the token is valid, return the User with that user_id.
-        return User.query.get(user_id)
-
 
     # Specifies an __repr__ method (magic method / dunderscore method).
     def __repr__ (self):

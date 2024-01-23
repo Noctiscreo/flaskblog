@@ -335,7 +335,7 @@ def reset_token(token):
     if current_user.is_authenticated:
         # Make sure that the user is logged out.
         return redirect(url_for('home'))
-    # very_reset_token is a static method we defined in models.py,
+    # verify_reset_token is a static method we defined in models.py,
     # which returns User.query.get(user_id)
     user = User.verify_reset_token(token)
     # If user above is expired or invalid (due to invalid token):

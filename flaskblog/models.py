@@ -24,7 +24,6 @@ class User(db.Model, UserMixin):
     image_file = db.Column(db.String(20), nullable=False, default='default.jpg')
     # The password will be a hashed string, 60 characters long.
     password = db.Column(db.String(60), nullable=False)
-    
 
     def get_reset_token(self, expired_sec=1800):
         s = jwt.encode({"exp": datetime.now(tz=timezone.utc) + timedelta
